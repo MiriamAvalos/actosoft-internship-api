@@ -49,4 +49,29 @@ router.post('/usuarios', async (req, res) => {
   });
   
 
+
+
+  // DELETE /api/usuarios/:id → Eliminar un usuario por ID
+router.delete('/usuarios/:id', async (req, res) => {
+    const { id } = req.params; // Obtén el ID del usuario desde los parámetros de la URL
+  
+    try {
+      const result = await pool.query(
+        'DELETE FROM usuarios WHERE id = $1 RETURNING *', 
+        [id]
+      );
+  
+      if (result.rowCount === 0) {
+        // Si no se encuentra el usuario con el ID proporcionado
+        return res.status(404).json({ error: 'Usuario no encontrado' });
+      }
+  
+      res.status(200).json({ message: 'Usuario eliminado correctamente' });
+    } catch (error) {
+      console.error('Error al eliminar el usuario:', error);
+      res.status(500).json({ error: 'Error al eliminar el usuario' });
+    }
+  });
+  
+
 module.exports = router;  // Asegúrate de exportar las rutas
