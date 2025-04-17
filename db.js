@@ -5,6 +5,13 @@ const express = require('express');
 const app = express();
 const usuariosRoutes = require('./routes/usuarios');  // Importa las rutas de usuarios
 
+// Middleware para manejar las rutas de usuarios
+app.use(express.json());  // Esto es necesario para manejar los datos en formato JSON
+
+
+// Rutas
+app.use('/api', usuariosRoutes);
+
 // Conexión a la base de datos, aquí se usan las variables de entorno
 const { Pool } = require('pg');
 const pool = new Pool({
@@ -23,8 +30,6 @@ pool.connect()
   .then(() => console.log('Conexión exitosa a la base de datos AWS'))
   .catch(err => console.error('Error al conectar a la base de datos', err));
 
-// Middleware para manejar las rutas de usuarios
-app.use('/api', usuariosRoutes);  // Aquí estás agregando el prefijo /api a las rutas de usuarios
 
 app.listen(5000, () => {
   console.log('Servidor corriendo en puerto 5000');
