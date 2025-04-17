@@ -4,6 +4,7 @@ require('dotenv').config();  // Esto carga las variables del archivo .env
 const express = require('express');
 const app = express();
 const usuariosRoutes = require('./routes/usuarios');  // Importa las rutas de usuarios
+const tareasRoutes = require('./routes/tareas');
 
 // Middleware para manejar las rutas de usuarios
 app.use(express.json());  // Esto es necesario para manejar los datos en formato JSON
@@ -11,6 +12,8 @@ app.use(express.json());  // Esto es necesario para manejar los datos en formato
 
 // Rutas
 app.use('/api', usuariosRoutes);
+app.use('/api', tareasRoutes);
+
 
 // Conexión a la base de datos, aquí se usan las variables de entorno
 const { Pool } = require('pg');
