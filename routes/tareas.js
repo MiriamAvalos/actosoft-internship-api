@@ -17,22 +17,24 @@ const pool = new Pool({
 router.post('/tareas', async (req, res) => {
     console.log('Cuerpo de la solicitud:', req.body); // Para ver qué datos se están recibiendo
 
-  const { descripcion, estado, fecha_limite, usuario_id, created_at } = req.body;
+    const { descripcion, estado, fecha_limite, usuario_id } = req.body;
 
-  if (!descripcion || !estado || !fecha_limite || !usuario_id || !created_at) {
-    return res.status(400).json({ error: 'Todos los campos son obligatorios' });
-  }
+    // Validar los campos necesarios
+    if (!descripcion || !estado || !fecha_limite || !usuario_id) {
+        return res.status(400).json({ error: 'Todos los campos son obligatorios' });
+    }
 
-  try {
-    const result = await pool.query(
-      'INSERT INTO tareas (descripcion, estado, fecha_limite, usuario_id, created_at) VALUES ($1, $2, $3) RETURNING *',
-      [descripcion, estado, fecha_limite, usuario_id, created_at]
-    );
-    res.status(201).json(result.rows[0]);
-  } catch (error) {
-    console.error('Error al crear la tarea:', error);
-    res.status(500).json({ error: 'Error al crear la tarea' });
-  }
+    try {
+        const result = await pool.query(
+            'INSERT INTO tareas (descripcion, estado, fecha_limite, usuario_id) VALUES ($1, $2, $3, $4) RETURNING *',
+            [descripcion, estado, fecha_limite, usuario_id]
+        );
+        res.status(201).json(result.rows[0]);
+    } catch (error) {
+        console.error('Error al crear la tarea:', error.message);  // Mostrar mensaje de error
+        res.status(500).json({ error: 'Error al crear la tarea', details: error.message }); // Detalles del error
+    }
 });
+
 
 module.exports = router;
