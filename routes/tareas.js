@@ -47,6 +47,35 @@ router.get('/tareas', async (req, res) => {
       res.status(500).json({ error: 'Error al obtener tareas' });
     }
   });
+
+
+
+  // PUT /api/tareas/:id → Editar una tarea por su ID
+router.put('/tareas/:id', async (req, res) => {
+    const id = req.params.id;
+    const { descripcion, estado, fecha_limite } = req.body;
+  
+    if (!descripcion || !estado || !fecha_limite) {
+      return res.status(400).json({ error: 'Todos los campos son obligatorios' });
+    }
+  
+    try {
+      const result = await pool.query(
+        'UPDATE tareas SET descripcion = $1, estado = $2, fecha_limite = $3 WHERE id = $4 RETURNING *',
+        [descripcion, estado, fecha_limite, id]
+      );
+  
+      if (result.rowCount === 0) {
+        return res.status(404).json({ error: 'Tarea no encontrada' });
+      }
+  
+      res.json(result.rows[0]);
+    } catch (error) {
+      console.error('Error al actualizar tarea:', error.message);
+      res.status(500).json({ error: 'Error al actualizar tarea' });
+    }
+  });
+  
   
 
 module.exports = router;
