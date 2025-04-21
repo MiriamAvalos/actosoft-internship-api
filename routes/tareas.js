@@ -76,6 +76,30 @@ router.put('/tareas/:id', async (req, res) => {
     }
   });
   
+// DELETE /api/tareas/:id → Eliminar una tarea por su ID
+router.delete('/tareas/:id', async (req, res) => {
+    const id = req.params.id;
+
+    try {
+        // Intenta eliminar la tarea
+        const result = await pool.query(
+            'DELETE FROM tareas WHERE id = $1 RETURNING *',
+            [id]
+        );
+
+        if (result.rowCount === 0) {
+            // Si no se encuentra la tarea con ese ID
+            return res.status(404).json({ error: 'Tarea no encontrada' });
+        }
+
+        // Si se eliminó correctamente
+        res.status(200).json({ message: 'Tarea eliminada con éxito' });
+    } catch (error) {
+        console.error('Error al eliminar tarea:', error.message);
+        res.status(500).json({ error: 'Error al eliminar tarea' });
+    }
+});
+
   
 
 module.exports = router;
