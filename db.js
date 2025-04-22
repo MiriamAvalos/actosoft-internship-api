@@ -1,10 +1,12 @@
 // server.js o db.js
 require('dotenv').config();  // Esto carga las variables del archivo .env
 
+
 const express = require('express');
 const app = express();
 const usuariosRoutes = require('./routes/usuarios');  // Importa las rutas de usuarios
 const tareasRoutes = require('./routes/tareas');
+const authRoutes = require('./routes/auth'); // ajusta si está en otra carpeta
 
 // Middleware para manejar las rutas de usuarios
 app.use(express.json());  // Esto es necesario para manejar los datos en formato JSON
@@ -13,6 +15,7 @@ app.use(express.json());  // Esto es necesario para manejar los datos en formato
 // Rutas
 app.use('/api', usuariosRoutes);
 app.use('/api', tareasRoutes);
+app.use(authRoutes);
 
 
 // Conexión a la base de datos, aquí se usan las variables de entorno

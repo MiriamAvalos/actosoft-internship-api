@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { Pool } = require('pg');
-const verificarToken = require('../middleware/auth');
+const verificarToken = require('../routes/auth');
 
 const pool = new Pool({
   host: process.env.DB_HOST,
