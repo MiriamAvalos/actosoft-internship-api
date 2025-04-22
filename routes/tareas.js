@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { Pool } = require('pg');
+const verificarToken = require('../middleware/auth');
 
 const pool = new Pool({
   host: process.env.DB_HOST,
@@ -38,15 +39,20 @@ router.post('/tareas', async (req, res) => {
 
   
 // Ruta GET para obtener tareas
-router.get('/tareas', async (req, res) => {
-    try {
-      const result = await pool.query('SELECT * FROM tareas ORDER BY created_at DESC');
-      res.status(200).json(result.rows);
-    } catch (error) {
-      console.error('Error al obtener tareas:', error.message);
-      res.status(500).json({ error: 'Error al obtener tareas' });
-    }
-  });
+router.get('/tareas', verificarToken, async (req, res) => {
+  const userId = req.user.user_id;
+
+  try {
+    const result = await pool.query(
+      'SELECT * FROM tareas WHERE usuario_id = $1 ORDER BY created_at DESC',
+      [userId]
+    );
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error al obtener tareas:', error);
+    res.status(500).json({ error: 'Error al obtener tareas' });
+  }
+});
 
 
 

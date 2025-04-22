@@ -3,6 +3,7 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
 const { Pool } = require('pg');  // Conexión a la base de datos
+const jwt = require('jsonwebtoken');
 
 const pool = new Pool({
   host: process.env.DB_HOST,
@@ -35,34 +36,52 @@ router.get('/usuarios', async (req, res) => {
 });
 
 
-// POST /usuarios → Crear un nuevo usuario con contraseña cifrada
+
+const JWT_SECRET = 'mi_clave_secreta_supersegura'; // 👈 Esto en producción debería ir en variables de entorno
+
+// POST /usuarios → Crear un nuevo usuario con contraseña cifrada y token
 router.post('/usuarios', async (req, res) => {
   const { nombre, email, password } = req.body;
 
-  // Verificamos que los campos sean obligatorios
   if (!nombre || !email || !password) {
     return res.status(400).json({ error: 'Nombre, email y contraseña son obligatorios' });
   }
 
-  // Ciframos la contraseña antes de almacenarla
-  const saltRounds = 10; // Puedes ajustar el número de rondas según lo desees
-  const hashedPassword = await bcrypt.hash(password, saltRounds);
-
   try {
-    // Guardamos el nuevo usuario con la contraseña cifrada
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+
     const result = await pool.query(
       'INSERT INTO usuarios (nombre, email, password) VALUES ($1, $2, $3) RETURNING *',
       [nombre, email, hashedPassword]
     );
 
-    console.log('Usuario creado:', result.rows[0]);
-    res.status(201).json(result.rows[0]);
+    const newUser = result.rows[0];
+
+    // ✅ Generar el token con el user_id y el email
+    const token = jwt.sign(
+      { user_id: newUser.id, email: newUser.email },
+      JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+
+    console.log('Usuario creado:', newUser);
+
+    // ✅ Enviar usuario y token al frontend
+    res.status(201).json({
+      user: {
+        id: newUser.id,
+        nombre: newUser.nombre,
+        email: newUser.email
+      },
+      token
+    });
   } catch (error) {
     console.error('Error al crear el usuario:', error);
     res.status(500).json({ error: 'Error al crear el usuario' });
   }
 });
-  
+
 
 
 
