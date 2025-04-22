@@ -4,6 +4,7 @@ const router = express.Router();
 const bcrypt = require('bcrypt');
 const { Pool } = require('pg');  // Conexión a la base de datos
 const jwt = require('jsonwebtoken');
+require('dotenv').config();
 
 const pool = new Pool({
   host: process.env.DB_HOST,
@@ -37,7 +38,8 @@ router.get('/usuarios', async (req, res) => {
 
 
 
-const JWT_SECRET = 'mi_clave_secreta_supersegura'; // 👈 Esto en producción debería ir en variables de entorno
+const JWT_SECRET = process.env.JWT_SECRET;
+// 👈 Esto en producción debería ir en variables de entorno
 
 // POST /usuarios → Crear un nuevo usuario con contraseña cifrada y token
 router.post('/usuarios', async (req, res) => {

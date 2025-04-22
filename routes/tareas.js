@@ -56,54 +56,68 @@ router.get('/tareas', verificarToken, async (req, res) => {
 
 
 
-  // PUT /api/tareas/:id → Editar una tarea por su ID
-router.put('/tareas/:id', async (req, res) => {
-    const id = req.params.id;
-    const { descripcion, estado, fecha_limite } = req.body;
-  
-    if (!descripcion || !estado || !fecha_limite) {
-      return res.status(400).json({ error: 'Todos los campos son obligatorios' });
+// PUT /api/tareas/:id → Editar una tarea por su ID
+router.put('/tareas/:id', verificarToken, async (req, res) => {
+  const id = req.params.id;
+  const { descripcion, estado, fecha_limite } = req.body;
+  const userId = req.user.user_id; // El usuario autenticado
+
+  if (!descripcion || !estado || !fecha_limite) {
+    return res.status(400).json({ error: 'Todos los campos son obligatorios' });
+  }
+
+  try {
+    // Verificamos si la tarea pertenece al usuario autenticado
+    const result = await pool.query(
+      'SELECT * FROM tareas WHERE id = $1 AND usuario_id = $2',
+      [id, userId]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: 'Tarea no encontrada o no tienes permiso para editarla' });
     }
-  
-    try {
-      const result = await pool.query(
-        'UPDATE tareas SET descripcion = $1, estado = $2, fecha_limite = $3 WHERE id = $4 RETURNING *',
-        [descripcion, estado, fecha_limite, id]
-      );
-  
-      if (result.rowCount === 0) {
-        return res.status(404).json({ error: 'Tarea no encontrada' });
-      }
-  
-      res.json(result.rows[0]);
-    } catch (error) {
-      console.error('Error al actualizar tarea:', error.message);
-      res.status(500).json({ error: 'Error al actualizar tarea' });
-    }
-  });
-  
+
+    // Si la tarea pertenece al usuario, la actualizamos
+    const updateResult = await pool.query(
+      'UPDATE tareas SET descripcion = $1, estado = $2, fecha_limite = $3 WHERE id = $4 RETURNING *',
+      [descripcion, estado, fecha_limite, id]
+    );
+
+    res.json(updateResult.rows[0]);
+  } catch (error) {
+    console.error('Error al actualizar tarea:', error.message);
+    res.status(500).json({ error: 'Error al actualizar tarea' });
+  }
+});
+
+
 // DELETE /api/tareas/:id → Eliminar una tarea por su ID
-router.delete('/tareas/:id', async (req, res) => {
-    const id = req.params.id;
+router.delete('/tareas/:id', verificarToken, async (req, res) => {
+  const id = req.params.id;
+  const userId = req.user.user_id; // El usuario autenticado
 
-    try {
-        // Intenta eliminar la tarea
-        const result = await pool.query(
-            'DELETE FROM tareas WHERE id = $1 RETURNING *',
-            [id]
-        );
+  try {
+      // Verificamos si la tarea pertenece al usuario autenticado
+      const result = await pool.query(
+          'SELECT * FROM tareas WHERE id = $1 AND usuario_id = $2',
+          [id, userId]
+      );
 
-        if (result.rowCount === 0) {
-            // Si no se encuentra la tarea con ese ID
-            return res.status(404).json({ error: 'Tarea no encontrada' });
-        }
+      if (result.rowCount === 0) {
+          return res.status(404).json({ error: 'Tarea no encontrada o no tienes permiso para eliminarla' });
+      }
 
-        // Si se eliminó correctamente
-        res.status(200).json({ message: 'Tarea eliminada con éxito' });
-    } catch (error) {
-        console.error('Error al eliminar tarea:', error.message);
-        res.status(500).json({ error: 'Error al eliminar tarea' });
-    }
+      // Si la tarea pertenece al usuario, la eliminamos
+      const deleteResult = await pool.query(
+          'DELETE FROM tareas WHERE id = $1 RETURNING *',
+          [id]
+      );
+
+      res.status(200).json({ message: 'Tarea eliminada con éxito' });
+  } catch (error) {
+      console.error('Error al eliminar tarea:', error.message);
+      res.status(500).json({ error: 'Error al eliminar tarea' });
+  }
 });
 
   

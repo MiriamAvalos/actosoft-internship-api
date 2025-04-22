@@ -3,7 +3,7 @@ const router = express.Router();
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const { Pool } = require('pg');
-
+require('dotenv').config();
 
 
 const pool = new Pool({
@@ -41,7 +41,7 @@ router.post('/login', async (req, res) => {
 
     const token = jwt.sign(
       { user_id: user.id },
-      process.env.JWT_SECRET || 'secreto_super_seguro',
+      process.env.JWT_SECRET,
       { expiresIn: '1h' }
     );
 
