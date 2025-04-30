@@ -2,7 +2,9 @@ const express = require('express');
 const router = express.Router();
 const { Pool } = require('pg');
 const verificarToken = require('../routes/auth');
-
+const jwt = require('jsonwebtoken');
+const JWT_SECRET = process.env.JWT_SECRET; // Ase
+// gúrate de que JWT_SECRET esté configurado
 const pool = new Pool({
   host: process.env.DB_HOST,
   port: process.env.DB_PORT,
@@ -14,46 +16,46 @@ const pool = new Pool({
   }
 });
 
+
 // POST /api/tareas → Crear una nueva tarea
-router.post('/tareas', async (req, res) => {
-    console.log('Cuerpo de la solicitud:', req.body); // Para ver qué datos se están recibiendo
+// Middleware para verificar el token y extraer el user_id
+const verifyToken = (req, res, next) => {
+  const token = req.headers['authorization']?.split(' ')[1]; // Obtener el token del encabezado Authorization
 
-    const { descripcion, estado, fecha_limite, usuario_id } = req.body;
+  if (!token) {
+      return res.status(403).json({ error: 'No se proporcionó un token' });
+  }
 
-    // Validar los campos necesarios
-    if (!descripcion || !estado || !fecha_limite || !usuario_id) {
-        return res.status(400).json({ error: 'Todos los campos son obligatorios' });
-    }
+  jwt.verify(token, JWT_SECRET, (err, decoded) => {
+      if (err) {
+          return res.status(401).json({ error: 'Token no válido' });
+      }
+      
+      // Si el token es válido, agregar el user_id al objeto req para acceder en las siguientes rutas
+      req.user_id = decoded.user_id;
+      next();
+  });
+};
 
-    try {
-        const result = await pool.query(
-            'INSERT INTO tareas (descripcion, estado, fecha_limite, usuario_id) VALUES ($1, $2, $3, $4) RETURNING *',
-            [descripcion, estado, fecha_limite, usuario_id]
-        );
-        res.status(201).json(result.rows[0]);
-    } catch (error) {
-        console.error('Error al crear la tarea:', error.message);  // Mostrar mensaje de error
-        res.status(500).json({ error: 'Error al crear la tarea', details: error.message }); // Detalles del error
-    }
-});
 
-  
-// Ruta GET para obtener tareas
-router.get('/tareas', verificarToken, async (req, res) => {
-  const userId = req.user.user_id;
+router.get('/tareas', verifyToken, async (req, res) => {
+  const user_id = req.user_id; // Asegúrate de que user_id está disponible
+
+  if (!user_id) {
+      return res.status(400).json({ error: 'No se pudo obtener el user_id del token' });
+  }
 
   try {
-    const result = await pool.query(
-      'SELECT * FROM tareas WHERE usuario_id = $1 ORDER BY created_at DESC',
-      [userId]
-    );
-    res.json(result.rows);
+      const result = await pool.query(
+          'SELECT * FROM tareas WHERE usuario_id = $1',
+          [user_id] // Aquí pasamos el user_id a la consulta
+      );
+      res.status(200).json(result.rows); // Devolver las tareas del usuario
   } catch (error) {
-    console.error('Error al obtener tareas:', error);
-    res.status(500).json({ error: 'Error al obtener tareas' });
+      console.error('Error al obtener las tareas:', error.message);
+      res.status(500).json({ error: 'Error al obtener las tareas' });
   }
 });
-
 
 
 // PUT /api/tareas/:id → Editar una tarea por su ID
