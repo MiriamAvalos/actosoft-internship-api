@@ -3,3 +3,20 @@
 *.key
 *.pub
 id_rsa
+
+
+# Ignorar dependencias
+/node_modules/
+/backend/node_modules/
+/frontend/node_modules/
+
+# Ignorar archivos de sistema
+.DS_Store
+Thumbs.db
+
+# Ignorar archivos de entorno
+*.env
+
+# Ignorar build/dist
+/frontend/build/
+/todo-app/build/
