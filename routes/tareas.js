@@ -59,36 +59,36 @@ router.get('/tareas', verifyToken, async (req, res) => {
 
 
 // PUT /api/tareas/:id → Editar una tarea por su ID
-router.put('/tareas/:id', verificarToken, async (req, res) => {
+router.put('/tareas/:id', verifyToken, async (req, res) => {
   const id = req.params.id;
   const { descripcion, estado, fecha_limite } = req.body;
-  const userId = req.user.user_id; // El usuario autenticado
+  const userId = req.user_id; // Corregido: accedemos al user_id directamente
 
   if (!descripcion || !estado || !fecha_limite) {
-    return res.status(400).json({ error: 'Todos los campos son obligatorios' });
+      return res.status(400).json({ error: 'Todos los campos son obligatorios' });
   }
 
   try {
-    // Verificamos si la tarea pertenece al usuario autenticado
-    const result = await pool.query(
-      'SELECT * FROM tareas WHERE id = $1 AND usuario_id = $2',
-      [id, userId]
-    );
+      // Verificamos si la tarea pertenece al usuario autenticado
+      const result = await pool.query(
+          'SELECT * FROM tareas WHERE id = $1 AND usuario_id = $2',
+          [id, userId]
+      );
 
-    if (result.rowCount === 0) {
-      return res.status(404).json({ error: 'Tarea no encontrada o no tienes permiso para editarla' });
-    }
+      if (result.rowCount === 0) {
+          return res.status(404).json({ error: 'Tarea no encontrada o no tienes permiso para editarla' });
+      }
 
-    // Si la tarea pertenece al usuario, la actualizamos
-    const updateResult = await pool.query(
-      'UPDATE tareas SET descripcion = $1, estado = $2, fecha_limite = $3 WHERE id = $4 RETURNING *',
-      [descripcion, estado, fecha_limite, id]
-    );
+      // Si la tarea pertenece al usuario, la actualizamos
+      const updateResult = await pool.query(
+          'UPDATE tareas SET descripcion = $1, estado = $2, fecha_limite = $3 WHERE id = $4 RETURNING *',
+          [descripcion, estado, fecha_limite, id]
+      );
 
-    res.json(updateResult.rows[0]);
+      res.json(updateResult.rows[0]);
   } catch (error) {
-    console.error('Error al actualizar tarea:', error.message);
-    res.status(500).json({ error: 'Error al actualizar tarea' });
+      console.error('Error al actualizar tarea:', error.message);
+      res.status(500).json({ error: 'Error al actualizar tarea' });
   }
 });
 
