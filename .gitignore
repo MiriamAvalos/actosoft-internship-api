@@ -17,6 +17,3 @@ Thumbs.db
 # Ignorar archivos de entorno
 *.env
 
-# Ignorar build/dist
-/frontend/build/
-/todo-app/build/
