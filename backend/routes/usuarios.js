@@ -18,12 +18,6 @@ const pool = new Pool({
 });
 
 
-//Endpoint para Registro de Usuario
-
-
-
-
-
 
 // GET para obtener todos los usuarios
 router.get('/usuarios', async (req, res) => {
