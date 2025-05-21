@@ -27,7 +27,7 @@ function Login() {
       console.log('Token guardado en localStorage.');
 
       // ✅ Luego redirigimos al dashboard (o a la ruta que necesites)
-      navigate('/dashboard');
+      navigate('/tareas');
 
     } catch (error) {
       console.error('Error al iniciar sesión:', error.response?.data || error.message);
