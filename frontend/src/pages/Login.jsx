@@ -23,8 +23,9 @@ function Login() {
       localStorage.setItem('userId', user.id);
       localStorage.setItem('userName', user.nombre);
 
-      console.log('Usuario autenticado:', user.nombre);
       console.log('Token guardado en localStorage.');
+      console.log('Usuario autenticado:', token);
+      
 
       // ✅ Luego redirigimos al dashboard (o a la ruta que necesites)
       navigate('/tareas');
