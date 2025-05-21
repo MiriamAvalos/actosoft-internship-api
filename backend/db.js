@@ -16,7 +16,7 @@ app.use(cors());  // Aquí habilitamos CORS
 // Rutas
 app.use('/api', usuariosRoutes);
 app.use('/api', tareasRoutes);
-app.use(authRoutes);
+app.use('/api', authRoutes);
 
 // Conexión a la base de datos, aquí se usan las variables de entorno
 const { Pool } = require('pg');

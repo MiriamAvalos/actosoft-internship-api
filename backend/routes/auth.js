@@ -18,7 +18,7 @@ const pool = new Pool({
   });
 
 // POST /login → Iniciar sesión
-router.post('/login', async (req, res) => {
+router.post('/auth/login', async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
