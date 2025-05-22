@@ -1,52 +1,97 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-function Tareas() {
+const Tareas = () => {
   const [tareas, setTareas] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [nuevaTarea, setNuevaTarea] = useState({
+    descripcion: '',
+    estado: '',
+    fecha_limite: ''
+  });
+
+  const token = localStorage.getItem('token');
+
+  const obtenerTareas = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/api/tareas', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      setTareas(response.data);
+    } catch (error) {
+      console.error('Error al obtener tareas:', error);
+    }
+  };
 
   useEffect(() => {
-    const fetchTareas = async () => {
-      try {
-        const token = localStorage.getItem('token'); // 👈 obtenemos el token
-
-        if (!token) {
-          console.error('Token no encontrado');
-          return;
-        }
-
-        const response = await axios.get('http://localhost:5000/api/tareas', {
-          headers: {
-            Authorization: `Bearer ${token}` // 👈 enviamos el token en headers
-          }
-        });
-
-        setTareas(response.data); // 👈 actualizamos las tareas
-        setLoading(false);
-        console.log("lista de tareas:", response.data);
-      } catch (error) {
-        console.error('Error al obtener tareas:', error.message);
-        setLoading(false);
-      }
-    };
-
-    fetchTareas();
+    obtenerTareas();
   }, []);
 
-  if (loading) return <p>Cargando tareas...</p>;
+  const manejarCambio = (e) => {
+    setNuevaTarea({
+      ...nuevaTarea,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  const crearTarea = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.post(
+        'http://localhost:5000/api/tareas',
+        nuevaTarea,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+      setNuevaTarea({ descripcion: '', estado: '', fecha_limite: '' });
+      obtenerTareas(); // Actualiza la lista
+    } catch (error) {
+      console.error('Error al crear tarea:', error);
+    }
+  };
 
   return (
     <div>
       <h1>Tareas</h1>
+
+      <form onSubmit={crearTarea}>
+        <input
+          type="text"
+          name="descripcion"
+          placeholder="Descripción"
+          value={nuevaTarea.descripcion}
+          onChange={manejarCambio}
+          required
+        />
+        <input
+          type="text"
+          name="estado"
+          placeholder="Estado"
+          value={nuevaTarea.estado}
+          onChange={manejarCambio}
+          required
+        />
+        <input
+          type="date"
+          name="fecha_limite"
+          value={nuevaTarea.fecha_limite}
+          onChange={manejarCambio}
+          required
+        />
+        <button type="submit">Crear Tarea</button>
+      </form>
+
       <ul>
         {tareas.map((tarea) => (
-          <li key={tarea.id}>
-            {tarea.descripcion} - Estado: {tarea.estado} - Fecha límite: {tarea.fecha_limite}
-          </li>
+          <li key={tarea.id}>{tarea.descripcion} - {tarea.estado} - {tarea.fecha_limite}</li>
         ))}
       </ul>
     </div>
   );
-}
+};
 
 export default Tareas;

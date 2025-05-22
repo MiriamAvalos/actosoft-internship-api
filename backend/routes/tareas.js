@@ -17,7 +17,6 @@ const pool = new Pool({
 });
 
 
-// POST /api/tareas → Crear una nueva tarea
 // Middleware para verificar el token y extraer el user_id
 const verifyToken = (req, res, next) => {
   const token = req.headers['authorization']?.split(' ')[1]; // Obtener el token del encabezado Authorization
@@ -37,6 +36,28 @@ const verifyToken = (req, res, next) => {
   });
 };
 
+
+// POST /api/tareas → Crear una nueva tarea
+router.post('/tareas', verifyToken, async (req, res) => {
+    const user_id = req.user_id;
+    const { descripcion, estado, fecha_limite } = req.body;
+  
+    if (!descripcion || !estado || !fecha_limite) {
+      return res.status(400).json({ error: 'Todos los campos son obligatorios' });
+    }
+  
+    try {
+      const result = await pool.query(
+        'INSERT INTO tareas (usuario_id, descripcion, estado, fecha_limite) VALUES ($1, $2, $3, $4) RETURNING *',
+        [user_id, descripcion, estado, fecha_limite]
+      );
+  
+      res.status(201).json(result.rows[0]); // Devolver la tarea recién creada
+    } catch (error) {
+      console.error('Error al crear la tarea:', error.message);
+      res.status(500).json({ error: 'Error al crear la tarea' });
+    }
+  });
 
 router.get('/tareas', verifyToken, async (req, res) => {
   const user_id = req.user_id; // Asegúrate de que user_id está disponible
