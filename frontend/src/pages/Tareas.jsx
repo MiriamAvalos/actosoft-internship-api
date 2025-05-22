@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const Tareas = () => {
+  const navigate = useNavigate();
   const [tareas, setTareas] = useState([]);
   const [nuevaTarea, setNuevaTarea] = useState({
     descripcion: '',
@@ -53,9 +55,20 @@ const Tareas = () => {
       console.error('Error al crear tarea:', error);
     }
   };
+  //Cerrar sesión
+  const handleLogout = () => {
+    // Limpiar el localStorage
+    localStorage.removeItem('token');
+    localStorage.removeItem('userId');
+    localStorage.removeItem('userName');
+
+    // Redirigir a login
+    navigate('/login');
+  };
 
   return (
     <div>
+         <button onClick={handleLogout}>Cerrar sesión</button>
       <h1>Tareas</h1>
 
       <form onSubmit={crearTarea}>

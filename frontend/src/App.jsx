@@ -7,7 +7,7 @@ import Tareas from "./pages/Tareas";
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<Login />} />
+      <Route path="/login" element={<Login />} />
       <Route path="/tareas" element={<Tareas />} />
    
     </Routes>
