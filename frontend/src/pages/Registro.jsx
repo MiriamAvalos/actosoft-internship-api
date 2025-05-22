@@ -7,6 +7,7 @@ function Registro() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
+  const [mensaje, setMensaje] = useState('');
   const [errorMensaje, setErrorMensaje] = useState('');
 
   const handleRegister = async (e) => {
@@ -17,9 +18,13 @@ function Registro() {
         email,
         password,
       });
-
+      console.log('✅ Usuario registrado correctamente');
+      setMensaje('✅ Registro exitoso. Ya puedes iniciar sesión');
+      // Esperar 2 segundos y luego redirigir a login
+      setTimeout(() => {
       // Redirigir a login después del registro exitoso
-      navigate('/login');
+        navigate('/login');
+      }, 2500);
     } catch (error) {
       console.error('Error al registrarse:', error.response?.data || error.message);
       setErrorMensaje(error.response?.data?.error || 'Error al registrarse. Intenta de nuevo.');
@@ -56,6 +61,7 @@ function Registro() {
         <br />
         <button type="submit">Registrar</button>
       </form>
+      {mensaje && <p style={{ color: 'green' }}>{mensaje}</p>}
       {errorMensaje && <p style={{ color: 'red' }}>{errorMensaje}</p>}
     </div>
   );
