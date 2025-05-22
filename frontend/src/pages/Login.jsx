@@ -60,6 +60,9 @@ function Login() {
         <br />
         <button type="submit">Ingresar</button>
       </form>
+      <p>
+      ¿No tienes una cuenta? <a href="/usuarios">Regístrate</a>
+     </p>
       {errorMensaje && <p style={{ color: 'red' }}>{errorMensaje}</p>}
     </div>
   );
