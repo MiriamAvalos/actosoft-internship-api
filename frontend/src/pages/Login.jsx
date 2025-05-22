@@ -6,6 +6,7 @@ function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate(); // Hook de navegación
+  const [errorMensaje, setErrorMensaje] = useState('');
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -32,7 +33,9 @@ function Login() {
 
     } catch (error) {
       console.error('Error al iniciar sesión:', error.response?.data || error.message);
-    }
+      setErrorMensaje(error.response?.data?.error || 'Error al iniciar sesión. Inténtalo de nuevo.');
+      
+  }
   };
 
   return (
@@ -57,6 +60,7 @@ function Login() {
         <br />
         <button type="submit">Ingresar</button>
       </form>
+      {errorMensaje && <p style={{ color: 'red' }}>{errorMensaje}</p>}
     </div>
   );
 }
