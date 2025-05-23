@@ -115,9 +115,11 @@ router.put('/tareas/:id', verifyToken, async (req, res) => {
 
 
 // DELETE /api/tareas/:id → Eliminar una tarea por su ID
-router.delete('/tareas/:id', verificarToken, async (req, res) => {
-  const id = req.params.id;
-  const userId = req.user.user_id; // El usuario autenticado
+router.delete('/tareas/:id', verifyToken, async (req, res) => {
+  const id = req.params.id; 
+  const userId = req.user_id;
+ 
+  console.log('Eliminando tarea ID:', id, 'para user ID:', userId);
 
   try {
       // Verificamos si la tarea pertenece al usuario autenticado
