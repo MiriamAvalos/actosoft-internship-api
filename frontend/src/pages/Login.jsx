@@ -2,6 +2,7 @@ import { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom'; // para redirigir
 
+
 function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -64,7 +65,9 @@ function Login() {
       ¿No tienes una cuenta? <a href="/usuarios">Regístrate</a>
      </p>
       {errorMensaje && <p style={{ color: 'red' }}>{errorMensaje}</p>}
+   
     </div>
+    
   );
 }
 
